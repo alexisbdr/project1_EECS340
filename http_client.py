@@ -6,9 +6,13 @@ def parse_url(url):
 
 	parsed_url = urlparse(url)
 
-	scheme = parsed_url.scheme	
+	scheme = parsed_url.scheme
+	path = str(parsed_url.path)
 	port = parsed_url.port if parsed_url.port else 80
+	port_string = ':'+str(parsed_url.port) if parsed_url.port else ''
 	host = parsed_url.hostname if parsed_url.hostname else url
+
+	url = host
 
 	if scheme == 'https': 
 		sys.stderr.write('ERROR page requires encryption')
@@ -18,23 +22,21 @@ def parse_url(url):
 		sys.stderr.write('ERROR url does not start with http://')
 		sys.exit(1)
 
-	if port != 80 : 
-		request_message = "GET / HTTP/1.1\nHost:" + host + ":" + str(port) + "\n\n"
-	else: 
-		request_message = "GET / HTTP/1.1\nHost:" + host + "\n\n"
+	request_message = "GET " + path + " HTTP/1.1\r\nHost:" + host + port_string + "\r\n\r\n"
 
-	return port, host, request_message
+	return port, url, request_message
 
 
 def main(): 
 
 	url = str(sys.argv[1])
 
-	port, host, request_message = parse_url(url)
+	port, url, request_message = parse_url(url)
+	print(port, url, request_message)
 	
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-	s.connect((host, port))
+	s.connect((url, port))
 	
 	s.send(request_message)
 
