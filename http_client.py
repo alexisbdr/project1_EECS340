@@ -9,7 +9,7 @@ def parse_url(url):
 	parsed_url = urlparse(url)
 
 	scheme = parsed_url.scheme
-	path = str(parsed_url.path)
+	path = str(parsed_url.path) if parsed_url.path else '/'
 	port = parsed_url.port if parsed_url.port else 80
 	port_string = ':'+str(parsed_url.port) if parsed_url.port else ''
 	host = parsed_url.hostname if parsed_url.hostname else url
@@ -25,7 +25,7 @@ def parse_url(url):
 		sys.exit(1)
 
 	request_message = "GET " + path + " HTTP/1.1\r\nHost:" + host + port_string + "\r\n\r\n"
-
+	print(request_message)
 	return port, url, request_message
 
 def receive_page_chunks(sock):
@@ -120,7 +120,7 @@ def main():
 			continue
 
 		if response_code >= 400: 
-			sys.stdout.write(get_response_body(chunks))
+			sys.stdout.write(chunks)
 			sys.exit(1)
 
 if __name__ == "__main__": 
