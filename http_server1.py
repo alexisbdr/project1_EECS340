@@ -2,6 +2,16 @@ import socket
 import sys 
 from urlparse import urlparse 
 
+def enable_server(port):
+
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+	s.bind((socket.gethostname(), port))
+
+	s.listen()
+
+
+
 def main(): 
 
 	if len(sys.argv) < 2: 
@@ -11,7 +21,10 @@ def main():
 		sys.stderr.write("ERROR more than one porrt provided")
 		sys.exit(1)
 
-	port = str(sys.argv[1])
+	port = int(sys.argv[1])
+
+	if port < 1024: 
+		sys.stderr.write('ERROR - port number must be above 1024')
 
 	
 
