@@ -17,11 +17,11 @@ def parse_url(url):
 	url = host
 
 	if scheme == 'https': 
-		sys.stderr.write('ERROR page requires encryption')
+		sys.stderr.write('ERROR page requires encryption \n')
 		sys.exit(1)
 
 	if scheme == '': 
-		sys.stderr.write('ERROR url does not start with http://')
+		sys.stderr.write('ERROR url does not start with http:// \n')
 		sys.exit(1)
 
 	request_message = "GET " + path + " HTTP/1.1\r\nHost:" + host + port_string + "\r\n\r\n"
@@ -30,7 +30,7 @@ def parse_url(url):
 
 def receive_page_chunks(sock):
 	
-	CHUNK_SIZE = 4096
+	CHUNK_SIZE = 1024
 
 	chunks = []
 	while True: 
@@ -95,10 +95,10 @@ def GET_request(url):
 def main(): 
 
 	if len(sys.argv) < 2: 
-		sys.stderr.write("ERROR no URL provided")
+		sys.stderr.write("ERROR no URL provided \n")
 		sys.exit(1)
 	elif len(sys.argv) > 2: 
-		sys.stderr.write("ERROR more than one URL provided")
+		sys.stderr.write("ERROR more than one URL provided \n")
 		sys.exit(1)
 
 	url = str(sys.argv[1])

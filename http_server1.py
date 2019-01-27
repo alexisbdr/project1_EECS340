@@ -15,6 +15,7 @@ def check_command_input():
 
 class Socket:
 
+	CHUNK = 1024
 
 	def __init__(self): 
 
@@ -47,7 +48,9 @@ class Socket:
 
 			(client_socket, client_address) = sock.accept()
 
-			sock.recv(CHUNK)
+			data = client_address.recv(CHUNK)
+
+
 
 
 if __name__ == "__main__":
