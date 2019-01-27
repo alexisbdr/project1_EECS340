@@ -21,14 +21,14 @@ class Socket:
 
 		check_command_input()
 
-		self.host = socket.gethostname if socket.gethostname else ''
-		self.port = sys.argv[1]
+		self.host = ""
+		self.port = int(sys.argv[1])
 
 		if self.port < 1024:
 			sys.stderr.write('ERROR - port number is below 1024, please try again')
 			sys.exit(1)
 
-		create_socket()
+		self.create_socket()
 
 
 	def create_socket(self):
@@ -40,15 +40,17 @@ class Socket:
 		self.run_forever()
 
 		
-	def run_forever():
+	def run_forever(self):
 
 		while True: 
 
-			sock.listen(1) #1 means accept single connection
+			self.sock.listen(1) #1 means accept single connection
 
-			(client_socket, client_address) = sock.accept()
+			(client_socket, client_address) = self.sock.accept()
 
-			data = client_address.recv(CHUNK)
+			data = client_socket.recv(CHUNK)
+
+			print(data)
 
 
 
