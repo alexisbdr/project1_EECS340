@@ -25,7 +25,7 @@ def parse_url(url):
 		sys.exit(1)
 
 	request_message = "GET " + path + " HTTP/1.1\r\nHost:" + host + port_string + "\r\n\r\n"
-	print(request_message)
+	
 	return port, url, request_message
 
 def receive_page_chunks(sock):
@@ -53,6 +53,7 @@ def get_response_code(data):
 def get_response_content_type(data):
 
 	http_header = data.split(CRLF,1)[0].split('\n')
+	print(http_header)
 	for line in http_header:
 		if len(line) > 12 and line[0:6] == 'Content':
 			break
