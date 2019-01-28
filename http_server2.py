@@ -155,20 +155,10 @@ class Socket:
 
 		self.run_forever()
 
-		
-	def run_forever(self):
 
-		while True: 
+	def handle_requets(self, data):
 
-			try:
-
-				self.sock.listen(1) #1 means accept single connection
-
-				client_socket, client_address = self.sock.accept()
-
-				data = client_socket.recv(self.CHUNK)
-
-				if get_request_method(data) == "GET": 
+		if get_request_method(data) == "GET": 
 
 					file_name = get_file_name(data) 
 					
@@ -187,6 +177,20 @@ class Socket:
 
 					client_socket.close()
 
+		
+	def run_forever(self):
+
+		while True: 
+
+			try:
+
+				self.sock.listen(5) #1 means accept single connection
+
+				client_socket, client_address = self.sock.accept()
+
+				data = client_socket.recv(self.CHUNK)
+
+				
 			except (KeyboardInterrupt, SystemExit): 
 
 				self.sock.shutdown(socket.SHUT_RDWR)
@@ -194,6 +198,5 @@ class Socket:
 				sys.exit(1)
 
 
-
 if __name__ == "__main__":
-	sock = Socket()
+	Socket()
