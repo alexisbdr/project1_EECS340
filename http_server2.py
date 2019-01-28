@@ -179,9 +179,7 @@ class Socket:
 			else: 
 				http_response = generate_http_response(200, file_name)
 
-			client_socket.send(http_response)
-
-			client_socket.close()
+		return http_response
 
 		
 	def run_forever(self):
@@ -204,7 +202,7 @@ class Socket:
 					else: 
 						data = s.recv(self.CHUNK)
 						if data: 
-							data = handle_request(data)
+							data = self.handle_request(data)
 							message_queues[s].put(data)
 							if s not in outputs:
 								outputs.append(s)
