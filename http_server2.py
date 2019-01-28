@@ -4,6 +4,8 @@ from urlparse import urlparse
 import os
 import time
 import signal
+import select
+import Queue
 
 
 def signal_handler(sig, frame):
@@ -150,46 +152,83 @@ class Socket:
 	def create_socket(self):
 
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+		self.sock.setblocking(0)
 		
 		self.sock.bind((self.host, self.port))
+
+		self.sock.listen(10)
 
 		self.run_forever()
 
 
-	def handle_requets(self, data):
+	def handle_request(self, data):
 
 		if get_request_method(data) == "GET": 
 
-					file_name = get_file_name(data) 
-					
-					#Empty file path or file does not exist - Error 404 Not Found
-					if not file_name or not os.path.exists(file_name):
-						http_response = generate_http_response(404, file_name)
+			file_name = get_file_name(data) 
+			
+			#Empty file path or file does not exist - Error 404 Not Found
+			if not file_name or not os.path.exists(file_name):
+				http_response = generate_http_response(404, file_name)
 
-					#Wrong file type - 403
-					elif ends_with_(file_name): 
-						http_response = generate_http_response(403, file_name)
+			#Wrong file type - 403
+			elif ends_with_(file_name): 
+				http_response = generate_http_response(403, file_name)
 
-					else: 
-						http_response = generate_http_response(200, file_name)
+			else: 
+				http_response = generate_http_response(200, file_name)
 
-					client_socket.send(http_response)
+			client_socket.send(http_response)
 
-					client_socket.close()
+			client_socket.close()
 
 		
 	def run_forever(self):
 
-		while True: 
+		inputs = [ self.sock ]
+		outputs = []
+		message_queues = {}
+
+		while inputs: 
 
 			try:
 
-				self.sock.listen(5) #1 means accept single connection
+				readable, writable, exceptional = select.select(inputs, outputs, inputs)
+				for s in readable: 
+					if s is self.sock:
+						client_socket, client_address = s.accept()
+						client_socket.setblocking(0)
+						inputs.append(client_socket)
+						message_queues[client_socket] = Queue.Queue()
+					else: 
+						data = s.recv(self.CHUNK)
+						if data: 
+							data = handle_request(data)
+							message_queues[s].put(data)
+							if s not in outputs:
+								outputs.append(s)
+						else: 
+							if s in outputs:
+								outputs.remove(s)
+							inputs.remove(s)
+							s.close()
+							del message_queues[s]
+					
+					for s in writable: 
+						try: 
+							http_response = message_queues[s].get_nowait()
+						except Queue.Empty:
+							outputs.remove(s)
+						else:
+							s.send(http_response) 
 
-				client_socket, client_address = self.sock.accept()
-
-				data = client_socket.recv(self.CHUNK)
-
+					for s in exceptional: 
+						inputs.remove(s)
+						if s in outputs:
+							outputs.remove(s)
+						s.close()
+						del message_queues[s]
 				
 			except (KeyboardInterrupt, SystemExit): 
 
