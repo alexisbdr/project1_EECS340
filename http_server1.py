@@ -3,17 +3,29 @@ import sys
 from urlparse import urlparse 
 import os
 import time
+import signal
 
+
+def signal_handler(sig, frame):
+
+	sock.shutdown()
 
 def get_last_modified_time(path):
 
 	if platform.system() == 'Windows':
+
 		return os.path.getctime(path)
+	
 	else:
+	
 		stat = os.stat(path)
+	
 		try:
+	
 			return stat.st_birthtime
+	
 		except AttributeError:
+	
 			return stat.st_mtime
 
 
@@ -126,6 +138,13 @@ class Socket:
 		self.create_socket()
 
 
+	def shutdown(self): 
+
+		self.sock.shutdown(socket.SHUT_RDWR)
+
+		sys.exit(1)
+
+
 	def create_socket(self):
 
 		self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -139,32 +158,40 @@ class Socket:
 
 		while True: 
 
-			self.sock.listen(1) #1 means accept single connection
+			try:
 
-			client_socket, client_address = self.sock.accept()
+				self.sock.listen(1) #1 means accept single connection
 
-			data = client_socket.recv(self.CHUNK)
+				client_socket, client_address = self.sock.accept()
 
-			if get_request_method(data) == "GET": 
+				data = client_socket.recv(self.CHUNK)
 
-				file_name = get_file_name(data) 
-				
-				#Empty file path or file does not exist - Error 404 Not Found
-				if not file_name or not os.path.exists(file_name):
-					http_response = generate_http_response(404, file_name)
+				if get_request_method(data) == "GET": 
 
-				#Wrong file type - 403
-				elif ends_with_(file_name): 
-					http_response = generate_http_response(403, file_name)
+					file_name = get_file_name(data) 
+					
+					#Empty file path or file does not exist - Error 404 Not Found
+					if not file_name or not os.path.exists(file_name):
+						http_response = generate_http_response(404, file_name)
 
-				else: 
-					http_response = generate_http_response(200, file_name)
+					#Wrong file type - 403
+					elif ends_with_(file_name): 
+						http_response = generate_http_response(403, file_name)
 
-				client_socket.send(http_response)
+					else: 
+						http_response = generate_http_response(200, file_name)
 
-				client_socket.close()
+					client_socket.send(http_response)
+
+					client_socket.close()
+
+			except (KeyboardInterrupt, SystemExit): 
+
+				self.sock.shutdown(socket.SHUT_RDWR)
+
+				sys.exit(1)
 
 
 
 if __name__ == "__main__":
-	Socket()
+	sock = Socket()
