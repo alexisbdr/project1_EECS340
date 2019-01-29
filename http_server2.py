@@ -93,6 +93,9 @@ def get_request_method(data):
 
 	http_header = data.split('\n')[0].split()
 
+	if len(http_header) == 0:
+		return None
+
 	return str(http_header[0])
 
 
@@ -163,6 +166,8 @@ class Socket:
 
 
 	def handle_request(self, data):
+
+		http_response = ''
 
 		if get_request_method(data) == "GET":
 

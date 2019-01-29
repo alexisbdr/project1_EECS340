@@ -85,6 +85,9 @@ def get_request_method(data):
 
 	http_header = data.split('\n')[0].split()
 
+	if len(http_header) == 0:
+		return None
+
 	return str(http_header[0])
 
 
@@ -162,7 +165,7 @@ class Socket:
 
 				data = client_socket.recv(self.CHUNK)
 
-				if get_request_method(data) == "GET":
+				if data and get_request_method(data) == "GET":
 
 					file_name = get_file_name(data)
 
