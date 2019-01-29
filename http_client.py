@@ -34,10 +34,13 @@ def receive_page_chunks(sock):
 
 	chunks = []
 	while True:
-		chunk = sock.recv(CHUNK_SIZE)
-		if chunk:
-			chunks.append(chunk)
-		else:
+		try:
+			chunk = sock.recv(CHUNK_SIZE)
+			if chunk:
+				chunks.append(chunk)
+			else:
+				break
+		except socket.timeout : 
 			break
 
 	return ''.join(chunks)
@@ -82,6 +85,8 @@ def GET_request(url):
 	port, url, request_message = parse_url(url)
 
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+	s.settimeout(4)
 
 	s.connect((url, port))
 

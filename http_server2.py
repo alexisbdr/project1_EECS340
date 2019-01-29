@@ -183,7 +183,7 @@ class Socket:
 
 
 	def run_forever(self):
-
+		#From the select function documentation page
 		inputs = [ self.sock ]
 		outputs = []
 		message_queues = {}

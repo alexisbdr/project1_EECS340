@@ -11,22 +11,16 @@ def signal_handler(sig, frame):
 	sock.shutdown()
 
 
+#This function was pulled from a stack exchange post
 def get_last_modified_time(path):
 
 	if platform.system() == 'Windows':
-
 		return os.path.getctime(path)
-
 	else:
-
 		stat = os.stat(path)
-
 		try:
-
 			return stat.st_birthtime
-
 		except AttributeError:
-
 			return stat.st_mtime
 
 
@@ -196,4 +190,4 @@ class Socket:
 
 
 if __name__ == "__main__":
-	sock = Socket()
+	Socket()
